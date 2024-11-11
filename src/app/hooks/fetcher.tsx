@@ -1,25 +1,61 @@
 import { useEffect, useState } from 'react';
 
-type imgsFetch = string[];
-type errorFetch = [boolean, string | unknown];
-type loadingFetch = boolean;
-type imgArray = {
-    imgsPaths: imgsFetch;
-    onError: errorFetch;
-    onLoad: loadingFetch;
+type ImgData = {
+    url: string;
+    alt: { es: string; en: string };
+    credits: {
+        link: string;
+        author: string;
+        portfolio: string;
+    };
+};
+type ImgsRequest = {
+    imgsPaths: ImgData[];
+    onError: [boolean, string | unknown];
+    onLoad: boolean;
 };
 
-const useImgPathGetter = (prompt: string): imgArray => {
-    const [imgsPaths, setImgsPaths] = useState<imgsFetch>([]);
-    const [onError, setOnError] = useState<errorFetch>([false, '']);
-    const [onLoad, setOnLoad] = useState<loadingFetch>(true);
+const makeRequestUrl = (prompt: string, ammount: number) => {
+    const base = `https://api.unsplash.com/photos/random/?query=${prompt}`;
+    const count = `&count=${ammount}`;
+    const key = 'MtVF3iHiL4FqTKUhyunCRKrX3d2PBPIe6BrTs0v-Q5U';
+    const id = `&client_id=${key}`;
+
+    return `${base}${count}${id}`;
+};
+
+const useImgPathGetter = (prompt: string, ammount = 12): ImgsRequest => {
+    const [imgsPaths, setImgsPaths] = useState([]);
+    const [onError, setOnError] = useState([false, '']);
+    const [onLoad, setOnLoad] = useState(true);
 
     useEffect(() => {
         const fetcher = async () => {
             try {
-                setImgsPaths(['']);
+                const request = await fetch(makeRequestUrl(prompt, ammount), {
+                    mode: 'cors',
+                });
+
+                if (!request.ok) {
+                    throw Error(request.status);
+                }
+
+                const requestArr = await request.json();
+
+                const requestImg = requestArr.map((img): ImgData => {
+                    return {
+                        url: img.urls.small,
+                        alt: { es: img.alternative_slugs.es, en: img.slug },
+                        credits: {
+                            link: img.links.html,
+                            author: img.user.name,
+                            portfolio: img.user.portfolio_url,
+                        },
+                    };
+                });
+
+                setImgsPaths(requestImg);
             } catch (err) {
-                console.log(err);
                 setOnError([true, err]);
             } finally {
                 setOnLoad(false);
@@ -29,9 +65,9 @@ const useImgPathGetter = (prompt: string): imgArray => {
         fetcher();
 
         return () => {
-            console.log('unmount');
+            // console.log('unmount');
         };
-    }, [prompt]);
+    }, [prompt, ammount]);
 
     return { imgsPaths, onError, onLoad };
 };
