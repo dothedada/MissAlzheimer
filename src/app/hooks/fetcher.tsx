@@ -30,18 +30,21 @@ const useImgPathGetter = (prompt: string, ammount = 12): ImgsRequest => {
     const [onLoad, setOnLoad] = useState(true);
 
     useEffect(() => {
+        const controller = new AbortController();
+
         const fetcher = async () => {
             try {
                 const request = await fetch(makeRequestUrl(prompt, ammount), {
                     mode: 'cors',
+                    signal: controller.signal,
                 });
 
                 if (!request.ok) {
-                    throw Error(request.status);
+                    const { errors } = await request.json();
+                    throw { code: request.status, description: errors };
                 }
 
                 const requestArr = await request.json();
-
                 const requestImg = requestArr.map((img): ImgData => {
                     return {
                         url: img.urls.small,
@@ -56,16 +59,18 @@ const useImgPathGetter = (prompt: string, ammount = 12): ImgsRequest => {
 
                 setImgsPaths(requestImg);
             } catch (err) {
-                setOnError([true, err]);
+                const { code, description } = err;
+                const errPrompt = `Error ${code}: ${description}`;
+
+                setOnError([true, errPrompt]);
             } finally {
                 setOnLoad(false);
             }
         };
-
         fetcher();
 
         return () => {
-            // console.log('unmount');
+            controller.abort();
         };
     }, [prompt, ammount]);
 
