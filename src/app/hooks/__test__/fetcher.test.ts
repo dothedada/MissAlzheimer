@@ -74,7 +74,7 @@ describe('URL Image getter:', () => {
             ok: false,
             status: errorNumber,
             json: async () => ({
-                errors: errorMessage,
+                errors: [errorMessage],
             }),
         });
 
@@ -84,6 +84,7 @@ describe('URL Image getter:', () => {
             expect(result.current.onLoad).toBe(false);
         });
 
+        // console.log(result.current);
         expect(result.current.onError[0]).toBe(true);
         expect(result.current.onError[1]).toBe(
             `Error ${errorNumber}: ${errorMessage}`,

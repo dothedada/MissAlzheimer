@@ -1,18 +1,58 @@
 import { useEffect, useState } from 'react';
 
-type ImgData = {
+interface LocalizedText {
+    es: string;
+    en: string;
+}
+
+interface Author {
+    link: string;
+    author: string;
+    portfolio: string;
+}
+
+interface ImgData {
     url: string;
-    alt: { es: string; en: string };
-    credits: {
-        link: string;
-        author: string;
-        portfolio: string;
-    };
-};
+    alt: LocalizedText;
+    credits: Author;
+}
+
+type ErrorState = [isError: boolean, errorMessage: string];
+
 type ImgsRequest = {
     imgsPaths: ImgData[];
-    onError: [boolean, string | unknown];
+    onError: ErrorState;
     onLoad: boolean;
+};
+
+interface UnsplashURL {
+    small: string;
+}
+
+interface UnsplashAltSlug {
+    es: string;
+}
+
+interface UnsplashLink {
+    html: string;
+}
+
+interface UnsplashUser {
+    name: string;
+    portfolio_url: string;
+}
+
+interface ImgFetchedData {
+    urls: UnsplashURL;
+    alternative_slugs: UnsplashAltSlug;
+    slug: string;
+    links: UnsplashLink;
+    user: UnsplashUser;
+}
+
+type FetchError = {
+    code: number | 'unknown';
+    description: string[];
 };
 
 const makeRequestUrl = (prompt: string, ammount: number) => {
@@ -25,8 +65,8 @@ const makeRequestUrl = (prompt: string, ammount: number) => {
 };
 
 const useImgPathGetter = (prompt: string, ammount = 12): ImgsRequest => {
-    const [imgsPaths, setImgsPaths] = useState([]);
-    const [onError, setOnError] = useState([false, '']);
+    const [imgsPaths, setImgsPaths] = useState<ImgData[]>([]);
+    const [onError, setOnError] = useState<ErrorState>([false, '']);
     const [onLoad, setOnLoad] = useState(true);
 
     useEffect(() => {
@@ -41,11 +81,14 @@ const useImgPathGetter = (prompt: string, ammount = 12): ImgsRequest => {
 
                 if (!request.ok) {
                     const { errors } = await request.json();
-                    throw { code: request.status, description: errors };
+                    throw {
+                        code: request.status,
+                        description: errors,
+                    } as FetchError;
                 }
 
-                const requestArr = await request.json();
-                const requestImg = requestArr.map((img): ImgData => {
+                const requestArr: ImgFetchedData[] = await request.json();
+                const requestImg: ImgData[] = requestArr.map((img): ImgData => {
                     return {
                         url: img.urls.small,
                         alt: { es: img.alternative_slugs.es, en: img.slug },
@@ -59,8 +102,10 @@ const useImgPathGetter = (prompt: string, ammount = 12): ImgsRequest => {
 
                 setImgsPaths(requestImg);
             } catch (err) {
-                const { code, description } = err;
-                const errPrompt = `Error ${code}: ${description}`;
+                const { code = 'unknow', description = ['Unexpected error'] } =
+                    err as FetchError;
+
+                const errPrompt = `Error ${code}: ${description.join('')}`;
 
                 setOnError([true, errPrompt]);
             } finally {
