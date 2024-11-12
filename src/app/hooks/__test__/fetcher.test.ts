@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import useImgPathGetter from '../app/hooks/fetcher';
+import useImgPathGetter from '../fetcher';
 
 describe('URL Image getter:', () => {
     it('should return an object with imgsPaths, onError and onLoad keys', async () => {
