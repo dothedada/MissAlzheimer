@@ -35,3 +35,5 @@ interface FetchData {
     links: { html: string };
     user: { name: string; portfolio_url: string };
 }
+
+type Deck = Card[];
