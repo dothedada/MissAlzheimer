@@ -18,4 +18,8 @@ export class Card {
         img.alt = this.altEn;
         this.img = img;
     }
+
+    isEqual(other: Card) {
+        return this.id === other.id;
+    }
 }

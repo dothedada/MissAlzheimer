@@ -40,3 +40,22 @@ export const createDeck = (imgs: ImgData[]): Deck => {
 export const hasCard = (deck: Deck, id: string): boolean => {
     return deck.find((card) => card.id === id);
 };
+
+/**
+ * Compare if the card secuence of the user mathces to the game deck
+ * @param gameDeck is the current game deck in play
+ * @param userDeck is the card secuence played by the user
+ * @returns true if the current secuence match the game, otherwise is false
+ */
+export const compareSequence = (gameDeck: Deck, userDeck: Deck): boolean => {
+    if (userDeck.length > gameDeck.length) {
+        throw new Error('User deck cannot be bigger than game deck');
+    }
+
+    for (let i = 0; i < userDeck.length; i++) {
+        if (!userDeck[i].isEqual(gameDeck[i])) {
+            return false;
+        }
+    }
+    return true;
+};
