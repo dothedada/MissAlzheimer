@@ -3,7 +3,7 @@ import { createId } from './utils/deck';
 export class Card {
     id: string;
     author: string;
-    img;
+    img: HTMLImageElement;
     altEs: string;
     altEn: string;
 
@@ -17,9 +17,5 @@ export class Card {
         img.src = data.url;
         img.alt = this.altEn;
         this.img = img;
-    }
-
-    isEqual(other: Card) {
-        return this.id === other.id;
     }
 }
