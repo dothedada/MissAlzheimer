@@ -30,6 +30,14 @@ export class Deck {
     }
 
     /**
+     * Get the current ids in the deck
+     * @returns an array of ids
+     */
+    static getCurrentIds(): string[] {
+        return [...Deck.cards.keys()];
+    }
+
+    /**
      * Gets one card by the id
      * @param id the card id
      * @returns the Card object or undefined
@@ -134,7 +142,7 @@ export class Deck {
 
         const sequence = this.sequence;
         for (let i = Math.min(this.sequence.length, amount); i > 0; i--) {
-            const [j, k] = this.#getTwoRandomIndexes();
+            const [j, k] = this._getTwoRandomIndexes();
             [sequence[j], sequence[k]] = [sequence[k], sequence[j]];
         }
     }
@@ -143,7 +151,7 @@ export class Deck {
      * Get two random indexes from the sequence
      * @returns an array of two different numbers
      */
-    #getTwoRandomIndexes(): [number, number] {
+    protected _getTwoRandomIndexes(): [number, number] {
         if (this.sequence.length < 2) {
             throw new Error('the sequence must have a length more than 1');
         }
