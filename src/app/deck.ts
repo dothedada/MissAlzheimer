@@ -14,7 +14,7 @@ export class Deck {
     static cards: Map<string, Card> = new Map();
 
     /**
-     * Ordered sequence of card IDs representing the current state of the deck.
+     * Ordered sequence of card IDs that represents the state of the deck.
      */
     sequence: string[] = [];
 

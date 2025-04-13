@@ -4,14 +4,12 @@ import '../styles/styles.css';
 
 // TODO:
 // 1. estructura ĺogica de la aplicacion
-//      carga de imágenes: api shutter
 //      game mechanics 1: pick different
 //      game mechanics 2: pick pair
 //      game mechanics 3: arrange secuence
 //      game mechanics 4: what is different
 //      timmer
 //      memory degradation
-//      shuffle cards
 //      game randomizer
 // 2. modulo de carta
 // 3. modulo de stage

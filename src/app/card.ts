@@ -1,4 +1,4 @@
-import { createId } from './utils/deck';
+import { createId } from './utils/utils.ts';
 
 export class Card {
     id: string;
