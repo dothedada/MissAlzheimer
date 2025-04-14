@@ -87,7 +87,7 @@ describe('useImgDataFetcher', () => {
         global.fetch = vi.fn().mockImplementation(() =>
             Promise.resolve({
                 ok: false,
-                status: 666,
+                status: 404,
                 json: () => Promise.resolve(mockErrorData),
             }),
         );
@@ -96,10 +96,68 @@ describe('useImgDataFetcher', () => {
 
         await waitFor(() => {
             expect(result.current.onError[0]).toBe(true);
-            expect(result.current.onError[1].code).toBe(666);
+            expect(result.current.onError[1].code).toBe(404);
             expect(result.current.onError[1].description).toBe(
                 mockErrorData.errors[0],
             );
+        });
+    });
+
+    it('should return error if the amount of images is less than the requested', async () => {
+        const { result } = renderHook(() => useImgDataFetcher('lucy', 17));
+
+        await waitFor(() => {
+            expect(result.current.onError[0]).toBe(true);
+            expect(result.current.onError[1].code).toBe(666);
+            expect(result.current.onError[1].description).toBe(
+                'not enough images to fulfill the request',
+            );
+        });
+    });
+
+    it('should return an array containig the data is the request is ok', async () => {
+        const { result } = renderHook(() => useImgDataFetcher('dog'));
+
+        expect(result.current.loaded).toBe(false);
+        await waitFor(() => {
+            expect(result.current.imgsData).toBeTruthy();
+            expect(result.current.onError[0]).toBe(false);
+            expect(result.current.loaded).toBe(true);
+        });
+    });
+
+    it('shoult return the specified amount of items', async () => {
+        const amount = 2;
+        const { result } = renderHook(() => useImgDataFetcher('dog', amount));
+
+        await waitFor(() => {
+            expect(result.current.imgsData.length).toBe(amount);
+        });
+    });
+
+    it('should abort fetch when unmounted', async () => {
+        const mock = vi.fn();
+        vi.spyOn(AbortController.prototype, 'abort').mockImplementation(mock);
+
+        const { unmount } = renderHook(() => useImgDataFetcher('dog'));
+        unmount();
+
+        expect(mock).toHaveBeenCalled();
+    });
+
+    it('should handle network errors', async () => {
+        vi.clearAllMocks();
+        global.fetch = vi
+            .fn()
+            .mockImplementation(() =>
+                Promise.reject(new Error('Network error')),
+            );
+
+        const { result } = renderHook(() => useImgDataFetcher('test'));
+
+        await waitFor(() => {
+            expect(result.current.onError[0]).toBe(true);
+            expect(result.current.loaded).toBe(true);
         });
     });
 });

@@ -30,8 +30,11 @@ export const makeURL = (prompt: string, amount: number): string => {
  * @property {boolean} ImgRequest.loaded - Returns the status of the fetch
  */
 export const useImgDataFetcher = (prompt: string, amount = 16): ImgRequest => {
-    const [imgsData, setImgsData] = useState<ImgData[]>([]);
-    const [onError, setOnError] = useState<ErrorData>([false, {}]);
+    const [imgsData, setImgsData] = useState<FetchData[]>([]);
+    const [onError, setOnError] = useState<ErrorData>([
+        false,
+        { code: 0, description: [] },
+    ]);
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
@@ -54,7 +57,14 @@ export const useImgDataFetcher = (prompt: string, amount = 16): ImgRequest => {
 
                 const requestArr = await request.json();
 
-                setImgsData(requestArr);
+                if (requestArr.length < amount) {
+                    throw {
+                        code: 666,
+                        description: 'not enough images to fulfill the request',
+                    };
+                }
+
+                setImgsData(requestArr.slice(0, amount));
             } catch (err) {
                 setOnError([true, err as ErrorFetch]);
             } finally {
