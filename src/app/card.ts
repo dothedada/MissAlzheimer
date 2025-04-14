@@ -4,35 +4,19 @@
 export class Card {
     id: string;
     author: string;
-    img: HTMLImageElement;
     altEs: string;
     altEn: string;
+    img: HTMLImageElement;
 
-    constructor(data: ImgData) {
-        this.author = data.credits.author;
-        this.altEs = data.alt.es;
-        this.altEn = data.alt.en;
-        this.id = this._createId();
+    constructor(data: FetchData) {
+        this.id = data.id;
+        this.author = data.user.name;
+        this.altEs = data.alternative_slugs.es;
+        this.altEn = data.slug;
 
         const img = new Image();
-        img.src = data.url;
+        img.src = data.urls.small;
         img.alt = this.altEn;
         this.img = img;
-    }
-    /**
-     * Creates a random hex based on a timestamp
-     * @returns hex string
-     */
-    protected _randTimestamp(): string {
-        return Math.floor(new Date().getTime() * Math.random()).toString(16);
-    }
-
-    /**
-     * Creates an unique id for the card that mixes the author string with a random hex
-     * @param author a string representing the author name, fetched from Unsplash
-     * @returns a unique id, authorName_hexString
-     */
-    protected _createId(): string {
-        return `${this.author}_${this._randTimestamp()}`;
     }
 }
