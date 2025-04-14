@@ -22,7 +22,7 @@ export class Deck {
      * creates the cards elements an place them in the Deck
      *  @param data an array with the data fetches from Unsplash
      */
-    loadDeck(data: ImgData[]): void {
+    createDeck(data: FetchData[]): void {
         for (const imgData of data) {
             const card = new Card(imgData);
             Deck.cards.set(card.id, card);

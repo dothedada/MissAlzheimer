@@ -1,21 +1,21 @@
 import { Deck } from '../deck.ts';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { imgDataMock } from './imgDataMock.ts';
+import imgDataMock from '../hooks/__test__/fetchMock.json';
+//import { imgDataMock } from './imgDataMock.ts';
 
 describe('Deck', () => {
     let deck: Deck;
-    let dataMock: ImgData[];
+    let dataMock: FetchData[];
 
     beforeEach(() => {
         Deck.cards = new Map();
         deck = new Deck();
         dataMock = imgDataMock;
-        deck.loadDeck(dataMock);
+        deck.createDeck(dataMock);
     });
 
     describe('loadDeck', () => {
         it('should load cards into the static cards map', () => {
-            console.log(Deck.cards);
             expect(Deck.cards.size).toBe(dataMock.length);
         });
     });
@@ -34,7 +34,7 @@ describe('Deck', () => {
             const card = deck.getCardById(ids[0]);
 
             expect(card).toBeDefined();
-            expect(card?.img.src).toBe(`${dataMock[0].url}/`);
+            expect(card?.img.src).toBe(`${dataMock[0].urls.small}`);
         });
 
         it('should return undefined when card does not exist', () => {
@@ -100,7 +100,7 @@ describe('Deck', () => {
         });
 
         it('should throw an error when removing a non-existent card id', () => {
-            deck.loadDeck(dataMock);
+            deck.createDeck(dataMock);
 
             expect(() => {
                 deck.removeFromSequence('nonexistent');
@@ -115,6 +115,7 @@ describe('Deck', () => {
             deck.shuffleSequence();
             expect(deck.sequence.length).toBe(lgth);
         });
+
         it('should expect to be a sequence created by Math.random', () => {
             deck.loadCardsIdsToSequence();
             const mockRandom = vi.spyOn(Math, 'random').mockReturnValue(0.5);
@@ -124,11 +125,13 @@ describe('Deck', () => {
         });
 
         it('shold change the deck sequence', () => {
-            deck.loadCardsIdsToSequence();
+            const [id1, id2, id3] = Deck.getCurrentIds();
+            deck.addToSequence(id1);
+            deck.addToSequence(id2);
+            deck.addToSequence(id3);
             const originalSequence = [...deck.sequence];
             vi.spyOn(Math, 'random').mockReturnValue(0);
             deck.shuffleSequence();
-            const [id1, id2, id3] = Deck.getCurrentIds();
             const expectedSecuence = [id2, id3, id1];
 
             expect(deck.sequence).not.toEqual(originalSequence);
@@ -136,7 +139,7 @@ describe('Deck', () => {
         });
 
         it('should throw an error when trying to shuffle less than 2 cards', () => {
-            deck.loadDeck(dataMock);
+            deck.createDeck(dataMock);
             const [id1] = Deck.getCurrentIds();
             deck.addToSequence(id1);
 
@@ -165,7 +168,7 @@ describe('Deck', () => {
         it('should return true when sequences match', () => {
             const [id1, id2] = Deck.getCurrentIds();
             const otherDeck = new Deck();
-            otherDeck.loadDeck(dataMock);
+            otherDeck.createDeck(dataMock);
 
             deck.addToSequence(id1);
             deck.addToSequence(id2);
@@ -178,7 +181,7 @@ describe('Deck', () => {
         it('should return false when sequences do not match', () => {
             const [id1, id2] = Deck.getCurrentIds();
             const otherDeck = new Deck();
-            otherDeck.loadDeck(dataMock);
+            otherDeck.createDeck(dataMock);
 
             deck.addToSequence(id1);
             deck.addToSequence(id2);
@@ -191,7 +194,7 @@ describe('Deck', () => {
         it('should throw an error when other deck has more cards', () => {
             const [id1, id2] = Deck.getCurrentIds();
             const otherDeck = new Deck();
-            otherDeck.loadDeck(dataMock);
+            otherDeck.createDeck(dataMock);
 
             deck.addToSequence(id1);
             otherDeck.addToSequence(id1);
@@ -217,7 +220,10 @@ describe('Deck', () => {
                 .mockReturnValueOnce(0)
                 .mockReturnValueOnce(0.999);
             // @ts-ignore
-            expect(deck._getTwoRandomIndexes()).toStrictEqual([0, 2]);
+            expect(deck._getTwoRandomIndexes()).toStrictEqual([
+                0,
+                Deck.cards.size - 1,
+            ]);
         });
     });
 
