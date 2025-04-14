@@ -74,6 +74,34 @@ export class Deck {
     }
 
     /**
+     * Adds a random card to the sequence array
+     * @param noRepeat - Controls if repeated cards are allowed. If true, only adds cards not already in the sequence.
+     * @default false
+     * @throws When there are no more unique cards available to add to the sequence (when noRepeat is true)
+     * @throws When the internal deck array becomes empty during processing
+     */
+    addToSecuenceRandom(noRepeat = false) {
+        const selected = new Set(this.sequence);
+
+        if (noRepeat && Deck.cards.size === selected.size) {
+            throw new Error('cannot add more cards to the secuence');
+        }
+
+        const deckArr = [...Deck.cards.keys()];
+        let newCard: string;
+        do {
+            if (!deckArr.length) {
+                throw new Error('cannot add more cards to the secuence');
+            }
+            const index = Math.floor(Math.random() * deckArr.length);
+            newCard = deckArr[index];
+            deckArr.splice(index, 1);
+        } while (noRepeat && selected.has(newCard));
+
+        this.sequence.push(newCard);
+    }
+
+    /**
      * Removes all the cards ids with the given id from the sequence
      * @param id the card id to look for
      * @throws Error if the card id does not exist

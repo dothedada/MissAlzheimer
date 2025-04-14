@@ -1,7 +1,6 @@
 import { Deck } from '../deck.ts';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import imgDataMock from '../hooks/__test__/fetchMock.json';
-//import { imgDataMock } from './imgDataMock.ts';
 
 describe('Deck', () => {
     let deck: Deck;
@@ -81,6 +80,43 @@ describe('Deck', () => {
             expect(() => {
                 deck.addToSequence('nonexistent');
             }).toThrow(Error);
+        });
+    });
+
+    describe('addToSequenceRandom', () => {
+        beforeEach(() => {
+            vi.clearAllMocks();
+        });
+
+        it('should use math.random to pick a card', () => {
+            expect(deck.sequence.length).toBe(0);
+            const randSpy = vi.spyOn(Math, 'random');
+            deck.addToSecuenceRandom();
+            expect(randSpy).toHaveBeenCalled();
+        });
+
+        it('should add a random card id from de Deck to the secuence', () => {
+            expect(deck.sequence.length).toBe(0);
+            deck.addToSecuenceRandom();
+            expect(deck.sequence.length).toBe(1);
+            expect([...Deck.cards.keys()]).toContain(deck.sequence[0]);
+        });
+
+        it('should pick a card not in the secuence array if noRepeat param is true', () => {
+            expect(deck.sequence.length).toBe(0);
+            vi.spyOn(Math, 'random')
+                .mockReturnValueOnce(0)
+                .mockReturnValueOnce(0);
+            deck.addToSecuenceRandom();
+            expect(deck.sequence.length).toBe(1);
+            deck.addToSecuenceRandom(true);
+            expect(new Set(deck.sequence).size).toBe(2);
+        });
+
+        it('should throw error if noRepeat is true and there is no cards left to add', () => {
+            deck.loadCardsIdsToSequence();
+            expect(deck.sequence.length).toBe(Deck.cards.size);
+            expect(() => deck.addToSecuenceRandom(true)).toThrowError();
         });
     });
 
