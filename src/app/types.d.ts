@@ -1,10 +1,11 @@
 interface ImgRequest {
-    imgsData: ImgData[];
+    imgsData: FetchData[];
     onError: ErrorData;
     loaded: boolean;
 }
 
 interface ImgData {
+    id: string;
     url: string;
     alt: LocalTxt;
     credits: Author;
@@ -21,7 +22,7 @@ interface Author {
     portfolio: string;
 }
 
-type ErrorData = [isError: boolean, errorMsg: string];
+type ErrorData = [isError: boolean, errorMsg: ErrorFetch];
 
 interface ErrorFetch {
     code: number | 'unknow';
@@ -29,9 +30,10 @@ interface ErrorFetch {
 }
 
 interface FetchData {
-    urls: { small: string };
-    alternative_slugs: { es: string };
+    id: string;
     slug: string;
+    alternative_slugs: { es: string };
+    urls: { small: string };
     links: { html: string };
     user: { name: string; portfolio_url: string };
 }
